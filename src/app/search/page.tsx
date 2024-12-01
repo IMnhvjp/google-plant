@@ -1,14 +1,14 @@
 'use client'
 import { useEffect, useState } from 'react';
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Card, Tag, Typography } from "antd";
+import { Card, Tag, Typography, Pagination, Input, Button, List } from "antd";
 import {config} from "../../config/config";
-import Image from "next/image";
+import { SearchOutlined, LoadingOutlined } from "@ant-design/icons"
 
-type PlantDataType = {
+interface Plant {
   scientific_name: string;
-  english_name: string | null;
+  english_name: string;
   vietnamese_name: string[];
   other_names: string[];
   division: string;
@@ -22,99 +22,128 @@ type PlantDataType = {
   genus: string;
   genus_description: string;
   description: string;
-};
+}
 
+interface PlantResponse {
+  id: string;
+  score: number;
+  totalResults: number;
+  plant: Plant;
+}
+
+const { Title, Text } = Typography;
 
 const Search = () => {
+  
+  const [query, setQuery] = useState(String(useSearchParams().get('query')))
+  const [pageNum, setPageNum] = useState<number>(1);
+  // const [data, setData] = useState<PlantResponse[]>([])
+  // const [totalPage, setTotalPage] = useState(0)
+  const router = useRouter();
 
-  const path = usePathname();
-  const [plantData, setPlantData] = useState<PlantDataType>({
-    scientific_name: "Acacia auriculiformis",
-    english_name: null,
-    vietnamese_name: [
-        "Keo bông vàng",
-        "Keo lá tràm"
-    ],
-    other_names: [],
-    division: "Magnoliophyta",
-    division_description: "Thực vật có hoa; Mộc lan; Hạt kín",
-    _class: "Magnoliopsida",
-    _class_description: "Hai lá mầm",
-    order: "Fabales",
-    order_description: "Đậu",
-    family: "Mimosaceae",
-    family_description: "Trinh nữ",
-    genus: "Acacia",
-    genus_description: "Keo, Sống rắn, Sóng rắng",
-    description: "Cây gỗ lớn, thường xanh, cao 5 - 25 m. Tán lớn, màu xanh thẫm; thân tròn thẳng; vỏ màu xám đen. Cuống dạng lá (diệp thể) có dạng như lá đơn, hình lưỡi hái, dài 7 - 17 cm, rộng 1,5 - 2,7 cm, dày, cứng, không lông; gân 6 - 8, hình cung song song.\nCụm hoa hình bông mọc ở nách lá; mỗi bông dài 4 - 8 cm, mang nhiều hoa nhỏ màu vàng. Hoa có 5 lá đài nhỏ hợp nhau ở gốc thành dạng chuông; 5 cánh hoa dài gấp đôi lá đài, nhiều nhị và bầu chứa nhiều noãn. Quả dẹt, mỏng, dài 7 - 8 cm, rộng 1,2 - 1,4 cm, có một cánh thấp dọc theo chỗ nối giữa 2 mảnh vỏ; hạt 5 - 7, màu nâu.\nCó nguồn gốc ở Ôxtrâylia, được nhập trồng ở nhiều tỉnh miền Nam của Việt Nam, từ Quảng Nam, Kon Tum, Gia Lai vào tới Kiên Giang.\nCây mọc nhanh, chịu hạn, ưa sáng, mọc được trên nhiều loại đất như đất pha cát ven biển, đất ba dan vàng đỏ, đất bồi tụ, đất phù sa cổ. Thích hợp với vùng có mùa khô 6 tháng và lượng mưa 1000 tới 2000 mm.\nRa hoa kết quả rải rác từ tháng 7 tới tháng 10, có thể là từ tháng 5 năm này đến tháng 3 năm sau tùy theo điều kiện tự nhiên của từng địa phương.\nCây được trồng dọc đường đi, công viên ở các thị xã, thành phố. Cũng đã được đưa vào trồng thành rừng có kết quả; được trồng làm cây che bóng và trồng ở ranh giới vườn ươm để tránh gió.\nCây cho gỗ lớn, thân dài và thẳng, gỗ màu vàng trắng có vân không rõ, dùng làm nhà cửa, đóng hòm, làm thùng xe…\nCũng dùng làm thuốc. Chống vài siêu khuẩn. Lá hạ hoạt thần kinh (Phạm Hoàng Hộ, 1999)."
-  });
-  const [plantId, setPlantId] = useState(Number(path.split("/")[2]))
+  const queryClient = useQueryClient()
 
-
-  const detail = useQuery({
-    queryKey: ['detail'],
-    queryFn: async () => {
-        try {
-          const res = await fetch(`${config.apiUrl}/search/${plantId}`, {
-            method: "GET"
-          })
-          if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-          }
-          else {
-            setPlantData(await res.json());
-          }
-        } catch (error) {
-
-        }
+  const fetchData = async (page: number) => {
+    try {
+      const response = await fetch(`${config.apiUrl}/search_string/${page}?query=${query}`, {
+        method: "GET",
+      });
+      return response.json();
     }
-  })
+    catch(err) {
+      console.error("Error fetching data")
+      return null
+    }
+  }
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['search', pageNum],
+    queryFn: () => fetchData(pageNum),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[calc(50vh)]">
+        <LoadingOutlined className="text-6xl" />
+      </div>
+  )}
+
+  const handlePageChange = (page: number, pageSize: number) => {
+    if (pageNum !== page) {
+      setPageNum(page);
+    }
+  }
+
+  const handleSearch = () => {
+    if (query.trim() !== "") {
+      router.push(`/search?query=${query}`)
+    }
+  };
+
+  const handleNavigateToDetail = (id: string) => {
+    router.push(`/search/${id}`)
+  }
 
   return (
-    <div className="bg-gray-100 min-h-screen p-4 flex justify-center">
-      <Card
-        title={
-          <Typography.Title level={3} className="text-green-700">
-            {plantData.scientific_name}
-          </Typography.Title>
-        }
-        bordered={true}
-        className="w-full max-w-3xl shadow-lg"
-      >
-        <div className="mb-4">
-          <Typography.Title level={5}>Tên tiếng Việt:</Typography.Title>
-          {plantData.vietnamese_name.map((name, index) => (
-            <Tag color="green" key={index}>
-              {name}
-            </Tag>
-          ))}
-        </div>
+    <>
+    <div className="max-w-7xl mx-auto p-6">
+      <div className="flex w-full max-w-3xl border border-gray-300 rounded-full overflow-hidden shadow-sm focus-within:shadow-md">
+        {/* Input tìm kiếm */}
+        <Input
+          type="text"
+          placeholder="Tìm kiếm thực vật..."
+          className="flex-grow px-6 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-l-full"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onPressEnter={handleSearch}
+        />
+        
+        <button
+          className="px-6 py-3"
+          onClick={handleSearch}
+        >
+          <span className="text-xl"><SearchOutlined /></span>
+        </button>
+      </div>
 
-        <div className="mb-4">
-          <Typography.Title level={5}>Phân loại:</Typography.Title>
-          <Typography.Paragraph>
-            <strong>Ngành:</strong> {plantData.division} - {plantData.division_description}
-          </Typography.Paragraph>
-          <Typography.Paragraph>
-            <strong>Lớp:</strong> {plantData._class} - {plantData._class_description}
-          </Typography.Paragraph>
-          <Typography.Paragraph>
-            <strong>Bộ:</strong> {plantData.order} - {plantData.order_description}
-          </Typography.Paragraph>
-          <Typography.Paragraph>
-            <strong>Họ:</strong> {plantData.family} - {plantData.family_description}
-          </Typography.Paragraph>
-          <Typography.Paragraph>
-            <strong>Chi:</strong> {plantData.genus} - {plantData.genus_description}
-          </Typography.Paragraph>
-        </div>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">
+      </h1>
 
-        <div>
-          <Typography.Title level={5}>Mô tả:</Typography.Title>
-          <Typography.Paragraph>{plantData.description}</Typography.Paragraph>
-        </div>
-      </Card>
+      {/* Danh sách kết quả tìm kiếm */}
+      <List
+        bordered
+        dataSource={data}
+        renderItem={(item: any) => (
+          <List.Item className="bg-white shadow-md rounded-lg p-6 mb-4 hover:shadow-xl transition-shadow duration-300">
+            <div>
+              <Title
+                level={4}
+                className="mb-2 cursor-pointer text-blue-500 hover:underline"
+                onClick={() => handleNavigateToDetail(item.id)}
+              >
+                {item.plant.scientific_name} {item.plant.vietnamese_name[0] ? `- ${item.plant.vietnamese_name[0]}` : ""}
+              </Title>
+              {/* Mô tả */}
+              <Text type="secondary" className="text-sm">
+                Ngành: {item.plant.division_description} - Lớp: {item.plant._class_description} - Bộ: {item.plant.order_description} - Họ: {item.plant.family_description} - Chi: {item.plant.genus_description}
+              </Text>
+            </div>
+          </List.Item>
+        )}
+      />
+
+      {/* Phân trang */}
+      <div className="flex justify-center mt-6">
+        <Pagination
+          total={data[0]?.totalResults || 0}
+          pageSize={10}
+          current={pageNum}
+          onChange={handlePageChange}
+          className="flex justify-center"
+        />
+      </div>
     </div>
+    </>
   );
 
 }

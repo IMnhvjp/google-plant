@@ -10,11 +10,6 @@ import Image from "next/image";
 export default function Home() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <Head>
-        <title>Trang Tìm Kiếm</title>
-        <meta name="description" content="ahhhh" />
-      </Head>
-
       {/* Logo */}
       <div className="mb-8">
         <h1 className="text-5xl font-bold text-blue-600">
@@ -26,9 +21,6 @@ export default function Home() {
       <SearchBar />
 
       {/* Footer */}
-      <footer className="absolute bottom-4 text-gray-500">
-        <p>© 2024 Plant Search</p>
-      </footer>
     </div>
     )
 }
