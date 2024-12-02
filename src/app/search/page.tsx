@@ -37,7 +37,7 @@ const Search = () => {
   
   const [query, setQuery] = useState(String(useSearchParams().get('query')))
   const [pageNum, setPageNum] = useState<number>(1);
-  // const [data, setData] = useState<PlantResponse[]>([])
+  const [dataPlant, setDataPlant] = useState<PlantResponse[]>([])
   // const [totalPage, setTotalPage] = useState(0)
   const router = useRouter();
 
@@ -48,7 +48,9 @@ const Search = () => {
       const response = await fetch(`${config.apiUrl}/search_string/${page}?query=${query}`, {
         method: "GET",
       });
-      return response.json();
+      const res = await response.json()
+      setDataPlant(res)
+      return res;
     }
     catch(err) {
       console.error("Error fetching data")
@@ -56,27 +58,31 @@ const Search = () => {
     }
   }
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['search', pageNum],
+  const dataQuery = useQuery({
+    queryKey: ['search'],
     queryFn: () => fetchData(pageNum),
   });
 
-  if (isLoading) {
+
+  if (dataQuery.isLoading) {
     return (
       <div className="flex justify-center items-center h-[calc(50vh)]">
         <LoadingOutlined className="text-6xl" />
       </div>
   )}
 
-  const handlePageChange = (page: number, pageSize: number) => {
-    if (pageNum !== page) {
-      setPageNum(page);
-    }
+  const handlePageChange = async (page: number, pageSize: number) => {
+      await setPageNum(page);
+      console.log(page)
+      queryClient.invalidateQueries({ queryKey: ['search'] })
   }
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (query.trim() !== "") {
-      router.push(`/search?query=${query}`)
+      // router.push(`/search_string/1?query=${query}`)
+      await setPageNum(1);
+      await setQuery(query)
+      queryClient.invalidateQueries({ queryKey: ['search'] })
     }
   };
 
@@ -112,7 +118,7 @@ const Search = () => {
       {/* Danh sách kết quả tìm kiếm */}
       <List
         bordered
-        dataSource={data}
+        dataSource={dataPlant}
         renderItem={(item: any) => (
           <List.Item className="bg-white shadow-md rounded-lg p-6 mb-4 hover:shadow-xl transition-shadow duration-300">
             <div>
@@ -135,7 +141,7 @@ const Search = () => {
       {/* Phân trang */}
       <div className="flex justify-center mt-6">
         <Pagination
-          total={data[0]?.totalResults || 0}
+          total={dataPlant[0]?.totalResults || 0}
           pageSize={10}
           current={pageNum}
           onChange={handlePageChange}

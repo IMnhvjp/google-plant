@@ -46,7 +46,7 @@ const PlantDetail = () => {
           else {
             const data = await res.json();
             setPlantData(data);
-            return data;
+            return data.plant;
           }
         } catch (error) {
           console.log('loi server');
