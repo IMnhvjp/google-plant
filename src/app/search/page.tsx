@@ -89,7 +89,6 @@ const Search = () => {
   const handleNavigateToDetail = (id: string) => {
     router.push(`/search/${id}`)
   }
-
   return (
     <>
     <div className="max-w-7xl mx-auto p-6">
@@ -105,13 +104,18 @@ const Search = () => {
         />
         
         <button
-          className="px-6 py-3"
-          onClick={handleSearch}
+          className="px-6 py-3 bg-blue-500 text-white hover:bg-blue-600 focus:outline-none shadow-sm "
+          onClick={handleSearch}  // Call API on button click
         >
           <span className="text-xl"><SearchOutlined /></span>
         </button>
       </div>
 
+      {dataPlant.length > 0 && (
+        <div className="text-indigo-500 mt-4 mb-4">
+          Đã tìm thấy {dataPlant[0].totalResults} kết quả!
+        </div>
+      )}
       <h1 className="text-3xl font-bold text-gray-800 mb-6">
       </h1>
 
