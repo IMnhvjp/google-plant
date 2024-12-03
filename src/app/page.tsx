@@ -1,11 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react';
-import { useRouter } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import Head from "next/head";
 import SearchBar from "./components/searchBar";
-
-import Image from "next/image";
 
 export default function Home() {
     return (

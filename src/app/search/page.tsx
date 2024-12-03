@@ -1,8 +1,8 @@
 'use client'
-import { useEffect, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Card, Tag, Typography, Pagination, Input, Button, List } from "antd";
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from "next/navigation";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Typography, Pagination, Input, List } from "antd";
 import {config} from "../../config/config";
 import { SearchOutlined, LoadingOutlined } from "@ant-design/icons"
 
@@ -34,8 +34,8 @@ interface PlantResponse {
 const { Title, Text } = Typography;
 
 const Search = () => {
-  
-  const [query, setQuery] = useState(String(useSearchParams().get('query')))
+  const params = useSearchParams()
+  const [query, setQuery] = useState(params.get('query'));
   const [pageNum, setPageNum] = useState<number>(1);
   const [dataPlant, setDataPlant] = useState<PlantResponse[]>([])
   // const [totalPage, setTotalPage] = useState(0)
@@ -52,8 +52,8 @@ const Search = () => {
       setDataPlant(res)
       return res;
     }
-    catch(err) {
-      console.error("Error fetching data")
+    catch(e) {
+      console.error("Error fetching data", e)
       return null
     }
   }
@@ -71,14 +71,14 @@ const Search = () => {
       </div>
   )}
 
-  const handlePageChange = async (page: number, pageSize: number) => {
+  const handlePageChange = async (page: number) => {
       await setPageNum(page);
       console.log(page)
       queryClient.invalidateQueries({ queryKey: ['search'] })
   }
 
   const handleSearch = async () => {
-    if (query.trim() !== "") {
+    if (query?.trim() !== "") {
       // router.push(`/search_string/1?query=${query}`)
       await setPageNum(1);
       await setQuery(query)
@@ -99,7 +99,7 @@ const Search = () => {
           type="text"
           placeholder="Tìm kiếm thực vật..."
           className="flex-grow px-6 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-l-full"
-          value={query}
+          value={query || ''}
           onChange={(e) => setQuery(e.target.value)}
           onPressEnter={handleSearch}
         />
@@ -119,7 +119,7 @@ const Search = () => {
       <List
         bordered
         dataSource={dataPlant}
-        renderItem={(item: any) => (
+        renderItem={(item: PlantResponse) => (
           <List.Item className="bg-white shadow-md rounded-lg p-6 mb-4 hover:shadow-xl transition-shadow duration-300">
             <div>
               <Title
@@ -154,4 +154,12 @@ const Search = () => {
 
 }
 
-export default Search
+const SearchWrapper = () => {
+  return (
+    <Suspense>
+      <Search />
+    </Suspense>
+  )
+}
+
+export default SearchWrapper

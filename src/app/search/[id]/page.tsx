@@ -1,35 +1,34 @@
 'use client'
-import { useEffect, useState } from 'react';
-import { usePathname, useRouter } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+import { usePathname } from "next/navigation";
+import { useQuery } from '@tanstack/react-query';
 import { Card, Tag, Typography } from "antd";
 import { LoadingOutlined } from "@ant-design/icons"
 import {config} from "../../../config/config";
 
-type PlantDataType = {
-  scientific_name: string;
-  english_name: string | null;
-  vietnamese_name: string[];
-  other_names: string[];
-  division: string;
-  division_description: string;
-  _class: string;
-  _class_description: string;
-  order: string;
-  order_description: string;
-  family: string;
-  family_description: string;
-  genus: string;
-  genus_description: string;
-  description: string;
-};
+// type PlantDataType = {
+//   scientific_name: string;
+//   english_name: string | null;
+//   vietnamese_name: string[];
+//   other_names: string[];
+//   division: string;
+//   division_description: string;
+//   _class: string;
+//   _class_description: string;
+//   order: string;
+//   order_description: string;
+//   family: string;
+//   family_description: string;
+//   genus: string;
+//   genus_description: string;
+//   description: string;
+// };
 
 
 const PlantDetail = () => {
 
   const path = usePathname();
-  const [plantData, setPlantData] = useState<PlantDataType>();
-  const [plantId, setPlantId] = useState(String(path.split("/")[2]))
+  const plantId = String(path.split("/")[2])
 
 
   const detail = useQuery({
@@ -45,11 +44,10 @@ const PlantDetail = () => {
           }
           else {
             const data = await res.json();
-            setPlantData(data);
             return data.plant;
           }
         } catch (error) {
-          console.log('loi server');
+          console.log('loi server', error);
           return null;
         }
     }
