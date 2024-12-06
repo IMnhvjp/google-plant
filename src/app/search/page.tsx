@@ -1,8 +1,8 @@
 'use client'
 import { Suspense, useState } from 'react';
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Typography, Pagination, Input, List, Card, Tag } from "antd";
+import { Typography, Pagination, Input, Card, Tag } from "antd";
 import {config} from "../../config/config";
 import { SearchOutlined, LoadingOutlined } from "@ant-design/icons"
 
@@ -31,15 +31,13 @@ interface PlantResponse {
   plant: Plant;
 }
 
-const { Title, Text } = Typography;
-
 const Search = () => {
   const params = useSearchParams()
   const [query, setQuery] = useState(params.get('query'));
   const [pageNum, setPageNum] = useState<number>(1);
   const [dataPlant, setDataPlant] = useState<PlantResponse[]>([])
   // const [totalPage, setTotalPage] = useState(0)
-  const router = useRouter();
+  // const router = useRouter();
 
   const queryClient = useQueryClient()
 
@@ -90,10 +88,6 @@ const Search = () => {
   // const handleNavigateToDetail = (id: string) => {
   //   router.push(`/search/${id}`)
   // }
-
-  const phan_loai = async () => {
-    
-  }
 
   return (
     <>
