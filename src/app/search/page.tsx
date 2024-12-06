@@ -73,6 +73,7 @@ const Search = () => {
 
   const handlePageChange = async (page: number) => {
       await setPageNum(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       console.log(page)
       queryClient.invalidateQueries({ queryKey: ['search'] })
   }
@@ -107,6 +108,12 @@ const Search = () => {
           onChange={(e) => setQuery(e.target.value)}
           onPressEnter={handleSearch}
         />
+        <button
+          className="px-6 py-3"
+          onClick={handleSearch}
+        >
+          <span className="text-xl"><SearchOutlined /></span>
+        </button>
       </div>
       {/* Hien thi ket qua */}
       <div className="mt-6">
