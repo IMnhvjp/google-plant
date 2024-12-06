@@ -2,7 +2,7 @@
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Typography, Pagination, Input, List } from "antd";
+import { Typography, Pagination, Input, List, Card, Tag } from "antd";
 import {config} from "../../config/config";
 import { SearchOutlined, LoadingOutlined } from "@ant-design/icons"
 
@@ -86,8 +86,12 @@ const Search = () => {
     }
   };
 
-  const handleNavigateToDetail = (id: string) => {
-    router.push(`/search/${id}`)
+  // const handleNavigateToDetail = (id: string) => {
+  //   router.push(`/search/${id}`)
+  // }
+
+  const phan_loai = async () => {
+    
   }
 
   return (
@@ -103,42 +107,79 @@ const Search = () => {
           onChange={(e) => setQuery(e.target.value)}
           onPressEnter={handleSearch}
         />
-        
-        <button
-          className="px-6 py-3"
-          onClick={handleSearch}
-        >
-          <span className="text-xl"><SearchOutlined /></span>
-        </button>
+      </div>
+      {/* Hien thi ket qua */}
+      <div className="mt-6">
+        {dataPlant.map((data: { plant: Plant }, index: number) => (
+          <Card
+            key={index}
+            title={<span className="text-lg font-bold">{data.plant.scientific_name}</span>}
+            bordered={true}
+            className="mb-6 shadow-md"
+          >
+            {data.plant.vietnamese_name && (
+              <div className="mb-4">
+                <Typography.Title level={5} className="mb-2">
+                  Tên tiếng Việt:
+                </Typography.Title>
+                {data.plant.vietnamese_name.map((name: string, index: number) => (
+                  <Tag color="green" key={index}>
+                    {name}
+                  </Tag>
+                ))}
+              </div>
+            )}
+
+            {data.plant.other_names[0] && (
+              <div className="mb-4">
+                <Typography.Title level={5} className="mb-2">
+                  Tên khác:
+                </Typography.Title>
+                {data.plant.other_names.map((name: string, index: number) => (
+                  <Tag color="volcano" key={index}>
+                    {name}
+                  </Tag>
+                ))}
+              </div>
+            )}
+
+            {data.plant.division && (
+              <div className="mb-4">
+                <Typography.Title level={5} className="mb-2">
+                  Phân loại:
+                </Typography.Title>
+                <div>
+                  <p>
+                    <strong>Ngành:</strong> {data.plant.division} - {data.plant.division_description}
+                  </p>
+                  <p>
+                    <strong>Lớp:</strong> {data.plant._class} - {data.plant._class_description}
+                  </p>
+                  <p>
+                    <strong>Bộ:</strong> {data.plant.order} - {data.plant.order_description}
+                  </p>
+                  <p>
+                    <strong>Họ:</strong> {data.plant.family} - {data.plant.family_description}
+                  </p>
+                  <p>
+                    <strong>Chi:</strong> {data.plant.genus} - {data.plant.genus_description}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {data.plant.description && (
+              <div>
+                <Typography.Title level={5} className="mb-2">
+                  Mô tả:
+                </Typography.Title>
+                <p>{data.plant.description}</p>
+              </div>
+            )}
+          </Card>
+        ))}
       </div>
 
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">
-      </h1>
-
-      {/* Danh sách kết quả tìm kiếm */}
-      <List
-        bordered
-        dataSource={dataPlant}
-        renderItem={(item: PlantResponse) => (
-          <List.Item className="bg-white shadow-md rounded-lg p-6 mb-4 hover:shadow-xl transition-shadow duration-300">
-            <div>
-              <Title
-                level={4}
-                className="mb-2 cursor-pointer text-blue-500 hover:underline"
-                onClick={() => handleNavigateToDetail(item.id)}
-              >
-                {item.plant.scientific_name} {item.plant.vietnamese_name[0] ? `- ${item.plant.vietnamese_name[0]}` : ""}
-              </Title>
-              {/* Mô tả */}
-              <Text type="secondary" className="text-sm">
-                Ngành: {item.plant.division_description} - Lớp: {item.plant._class_description} - Bộ: {item.plant.order_description} - Họ: {item.plant.family_description} - Chi: {item.plant.genus_description}
-              </Text>
-            </div>
-          </List.Item>
-        )}
-      />
-
-      {/* Phân trang */}
       <div className="flex justify-center mt-6">
         <Pagination
           total={dataPlant[0]?.totalResults || 0}
