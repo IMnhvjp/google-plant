@@ -22,7 +22,13 @@ interface Plant {
   genus: string;
   genus_description: string;
   description: string;
+  other_info: string;
 }
+
+interface OtherInfo {
+  [key: string]: string | string[];  
+}
+
 
 interface PlantResponse {
   id: string;
@@ -103,7 +109,7 @@ const Search = () => {
           onPressEnter={handleSearch}
         />
         <button
-          className="px-6 py-3"
+          className="px-6 py-3" style={{color:"blue"}}
           onClick={handleSearch}
         >
           <span className="text-xl"><SearchOutlined /></span>
@@ -111,74 +117,101 @@ const Search = () => {
       </div>
       {/* Hien thi ket qua */}
       <div className="mt-6">
-        {dataPlant.map((data: { plant: Plant }, index: number) => (
-          <Card
-            key={index}
-            title={<span className="text-lg font-bold">{data.plant.scientific_name}</span>}
-            bordered={true}
-            className="mb-6 shadow-md"
-          >
-            {data.plant.vietnamese_name && (
-              <div className="mb-4">
-                <Typography.Title level={5} className="mb-2">
-                  Tên tiếng Việt:
-                </Typography.Title>
-                {data.plant.vietnamese_name.map((name: string, index: number) => (
-                  <Tag color="green" key={index}>
-                    {name}
-                  </Tag>
-                ))}
-              </div>
-            )}
+          {dataPlant.map((data: { plant: Plant }, index: number) => {
+            let otherInfo :OtherInfo = {} ;
+            try {
+              otherInfo = data.plant.other_info ? JSON.parse(data.plant.other_info) : {};
+              console.log(otherInfo)
+            } catch (e) {
+              console.error("Lỗi khi phân tích cú pháp JSON:", e);
+            }
 
-            {data.plant.other_names[0] && (
-              <div className="mb-4">
-                <Typography.Title level={5} className="mb-2">
-                  Tên khác:
-                </Typography.Title>
-                {data.plant.other_names.map((name: string, index: number) => (
-                  <Tag color="volcano" key={index}>
-                    {name}
-                  </Tag>
-                ))}
-              </div>
-            )}
+            return (
+              <Card
+                key={index}
+                title={<span className="text-lg font-bold" style={{ color: "darkorange" }}>{data.plant.scientific_name || ""}</span>}
+                bordered={true}
+                className="mb-6 shadow-md"
+              >
+                {data.plant.vietnamese_name && (
+                  <div className="mb-4">
+                    <Typography.Title level={5} className="mb-2">
+                      Tên tiếng Việt:
+                    </Typography.Title>
+                    {data.plant.vietnamese_name.map((name: string, index: number) => (
+                      <Tag color="green" key={index}>
+                        {name}
+                      </Tag>
+                    ))}
+                  </div>
+                )}
 
-            {data.plant.division && (
-              <div className="mb-4">
-                <Typography.Title level={5} className="mb-2">
-                  Phân loại:
-                </Typography.Title>
-                <div>
-                  <p>
-                    <strong>Ngành:</strong> {data.plant.division} - {data.plant.division_description}
-                  </p>
-                  <p>
-                    <strong>Lớp:</strong> {data.plant._class} - {data.plant._class_description}
-                  </p>
-                  <p>
-                    <strong>Bộ:</strong> {data.plant.order} - {data.plant.order_description}
-                  </p>
-                  <p>
-                    <strong>Họ:</strong> {data.plant.family} - {data.plant.family_description}
-                  </p>
-                  <p>
-                    <strong>Chi:</strong> {data.plant.genus} - {data.plant.genus_description}
-                  </p>
-                </div>
-              </div>
-            )}
+                {data.plant.other_names && data.plant.other_names[0] && (
+                  <div className="mb-4">
+                    <Typography.Title level={5} className="mb-2">
+                      Tên khác:
+                    </Typography.Title>
+                    {data.plant.other_names.map((name: string, index: number) => (
+                      <Tag color="volcano" key={index}>
+                        {name}
+                      </Tag>
+                    ))}
+                  </div>
+                )}
 
-            {data.plant.description && (
-              <div>
-                <Typography.Title level={5} className="mb-2">
-                  Mô tả:
-                </Typography.Title>
-                <p>{data.plant.description}</p>
-              </div>
-            )}
-          </Card>
-        ))}
+                {data.plant.division && (
+                  <div className="mb-4">
+                    <Typography.Title level={5} className="mb-2">
+                      Phân loại:
+                    </Typography.Title>
+                    <div>
+                      <p>
+                        <strong>Ngành:</strong> {data.plant.division} - {data.plant.division_description}
+                      </p>
+                      <p>
+                        <strong>Lớp:</strong> {data.plant._class} - {data.plant._class_description}
+                      </p>
+                      <p>
+                        <strong>Bộ:</strong> {data.plant.order} - {data.plant.order_description}
+                      </p>
+                      <p>
+                        <strong>Họ:</strong> {data.plant.family} - {data.plant.family_description}
+                      </p>
+                      <p>
+                        <strong>Chi:</strong> {data.plant.genus} - {data.plant.genus_description}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {data.plant.description && (
+                  <div>
+                    <Typography.Title level={5} className="mb-2">
+                      Mô tả:
+                    </Typography.Title>
+                    <p>{(data.plant.description.length > 1100) ? data.plant.description.slice(0, 1100) + "..." : data.plant.description}</p>
+                  </div>
+                )}
+
+                {Object.keys(otherInfo).length > 0 && (
+                  <div>
+                    <Typography.Title level={5} className="mb-2 mt-4">
+                      Thông tin khác:
+                    </Typography.Title>
+                    <ul style={{listStyleType: "disc",paddingLeft: "20px"}}>
+                    {Object.keys(otherInfo).map((key) => (
+                      <li key={key}>
+                        <strong>{key}:</strong> 
+                        {Array.isArray(otherInfo[key]) ? otherInfo[key].join(", ") : otherInfo[key]}
+                      </li>
+                    ))}
+
+                    </ul>
+                  </div>
+                )}
+              </Card>
+            );
+          })}
       </div>
 
       <div className="flex justify-center mt-6">
