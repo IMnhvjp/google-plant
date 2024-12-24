@@ -5,8 +5,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Typography, Pagination, Input, Card, Tag } from "antd";
 import {config} from "../../config/config";
 import { SearchOutlined, LoadingOutlined } from "@ant-design/icons"
+import Description from "../components/description"
 
 interface Plant {
+  url: string;
   scientific_name: string;
   english_name: string;
   vietnamese_name: string[];
@@ -42,6 +44,7 @@ const Search = () => {
   const [query, setQuery] = useState(params.get('query'));
   const [pageNum, setPageNum] = useState<number>(1);
   const [dataPlant, setDataPlant] = useState<PlantResponse[]>([])
+  const [isExpanded, setIsExpanded] = useState(false);
   // const [totalPage, setTotalPage] = useState(0)
   // const router = useRouter();
 
@@ -184,14 +187,15 @@ const Search = () => {
                   </div>
                 )}
 
-                {data.plant.description && (
+                {/* {data.plant.description && (
                   <div>
                     <Typography.Title level={5} className="mb-2">
                       Mô tả:
                     </Typography.Title>
                     <p>{(data.plant.description.length > 1100) ? data.plant.description.slice(0, 1100) + "..." : data.plant.description}</p>
                   </div>
-                )}
+                )} */}
+                <Description data={data.plant.description}/>
 
                 {Object.keys(otherInfo).length > 0 && (
                   <div>
@@ -209,6 +213,18 @@ const Search = () => {
                     </ul>
                   </div>
                 )}
+                {data.plant.url && 
+                  (<div className='mt-4'>
+                    <strong>Link:</strong>
+                    <a
+                      href={data.plant.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 underline hover:text-blue-700 ml-2 inline"
+                    >
+                      {data.plant.url}
+                    </a>
+                  </div>)}
               </Card>
             );
           })}
