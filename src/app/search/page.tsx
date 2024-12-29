@@ -8,7 +8,7 @@ import { SearchOutlined, LoadingOutlined } from "@ant-design/icons"
 import Description from "../components/description"
 
 interface Plant {
-  url: string;
+  link: string;
   scientific_name: string;
   english_name: string;
   vietnamese_name: string[];
@@ -213,16 +213,16 @@ const Search = () => {
                     </ul>
                   </div>
                 )}
-                {data.plant.url && 
+                {data.plant.link && 
                   (<div className='mt-4'>
                     <strong>Link:</strong>
                     <a
-                      href={data.plant.url}
+                      href={data.plant.link}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-500 underline hover:text-blue-700 ml-2 inline"
                     >
-                      {data.plant.url}
+                      {data.plant.link}
                     </a>
                   </div>)}
               </Card>
